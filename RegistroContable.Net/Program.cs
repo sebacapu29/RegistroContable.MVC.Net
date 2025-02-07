@@ -1,7 +1,11 @@
+using RegistroContable.Infraestructura.Impl;
+using RegistroContable.Infraestructura.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<IRepositorioTipoCuentas, RepositorioTipoCuentas>();
 
 var app = builder.Build();
 
