@@ -19,7 +19,7 @@ namespace RegistroContable.Infraestructura.Impl
             try
             {
                 using var connection = new SqlConnection(_connectionString);
-                var id = await connection.QuerySingleAsync<int>($"@INSERT INTO TipoCuentas (Nombre, UsuarioId, Orden) " +
+                var id = await connection.QuerySingleAsync<int>($"INSERT INTO TipoCuentas (Nombre, UsuarioId, Orden) " +
                                                     $"Values (@Nombre, @UsuarioId, 0);" +
                                                     $"SELECT SCOPE_IDENTITY();", tipoCuentas);
                 tipoCuentas.Id = id;
@@ -28,6 +28,19 @@ namespace RegistroContable.Infraestructura.Impl
             {
                 throw;
             }          
+        }
+
+        public async Task<bool> Existe(string nombre, int usuarioId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var existe = await connection.QueryFirstOrDefaultAsync<int>($"SELECT 1 FROM TipoCuentas WHERE Nombre = @Nombre AND @UsuarioId = @UsuarioId;", new { nombre, usuarioId });
+            return existe > 0;
+        }
+
+        public async Task<IEnumerable<TipoCuentas>> ObtenerTodas(int usuarioId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<TipoCuentas>($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE UsuarioId = @UsuarioId;",new { usuarioId });
         }
     }
 }
