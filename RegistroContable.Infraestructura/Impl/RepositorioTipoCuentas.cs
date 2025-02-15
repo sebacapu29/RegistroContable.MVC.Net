@@ -14,6 +14,19 @@ namespace RegistroContable.Infraestructura.Impl
             _connectionString = configuration!.GetConnectionString("DefaultConnection");
         }
 
+        public async Task Actualizar(TipoCuentas tipoCuentas)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(@"UPDATE TipoCuentas 
+                                           SET Nombre = @Nombre
+                                            Where Id = @Id", tipoCuentas);
+        }
+        public async Task<TipoCuentas> ObtenerPorId(int id, int usuarioId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QueryFirstOrDefaultAsync($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE Id = @Id AND @UsuarioId = @UsuarioId;", new { id, usuarioId });
+        }
+
         public async Task Crear(TipoCuentas tipoCuentas)
         {
             try
@@ -41,6 +54,21 @@ namespace RegistroContable.Infraestructura.Impl
         {
             using var connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<TipoCuentas>($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE UsuarioId = @UsuarioId;",new { usuarioId });
+        }
+
+        public async Task Borrar(int id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                await connection.ExecuteAsync(@"DELETE TipoCuentas                                            
+                                                Where Id = @Id", id);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
         }
     }
 }
