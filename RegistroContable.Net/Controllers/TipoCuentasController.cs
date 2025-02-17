@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RegistroContable.Domain;
 using RegistroContable.Infraestructura.Interfaces;
+using RegistroContable.MVC.Helpers;
 using RegistroContable.Net.Models;
 
 namespace RegistroContable.Net.Controllers
@@ -19,7 +20,7 @@ namespace RegistroContable.Net.Controllers
         {
             var usuarioId = await this._repositorioUsuarios.ObtenerUsuarioId();
             var tipoCuentas = await _repositorioTipoCuentas.ObtenerTodas(usuarioId);
-            var tipoCuentasVM = tipoCuentas.Select(tc => new TipoCuentaViewModel { Id = tc.Id, Nombre = tc.Nombre, Orden = tc.Orden, UsuarioId = tc.UsuarioId });
+            var tipoCuentasVM = MapperHelper.MappTipoCuentaDTOToVM(tipoCuentas);
             return View(tipoCuentasVM);
         }
         public IActionResult Crear()
@@ -39,14 +40,10 @@ namespace RegistroContable.Net.Controllers
                 ModelState.AddModelError(nameof(tipoCuenta.Nombre), $"El nombre {tipoCuenta.Nombre} ya existe.");
                 return View(tipoCuenta);
             }
-
-            TipoCuentas tipoCuentaDTO = await MappTipoCuenta(tipoCuenta);
-            this._repositorioTipoCuentas.Crear(tipoCuentaDTO);
+            tipoCuenta.UsuarioId = await this._repositorioUsuarios.ObtenerUsuarioId();
+            TipoCuentas tipoCuentaDTO = MapperHelper.MappTipoCuentaVMToDTO(tipoCuenta);
+            await this._repositorioTipoCuentas.Crear(tipoCuentaDTO);
             return RedirectToAction("Index");
-        }
-        private async Task<TipoCuentas> MappTipoCuenta(TipoCuentaViewModel tipoCuentaViewModel) {
-            int usuarioId = await this._repositorioUsuarios.ObtenerUsuarioId();
-            return new TipoCuentas { Nombre = tipoCuentaViewModel.Nombre, Orden = tipoCuentaViewModel.Orden, UsuarioId = usuarioId };
         }
         [HttpGet]
         public async Task<IActionResult> VerificarExisteTipoCuenta(string nombre)
@@ -110,8 +107,20 @@ namespace RegistroContable.Net.Controllers
             return View(tipoCuenta);
         }
         [HttpPost]
-        public async Task<IActionResult> Orden([FromBody] int id)
+        public async Task<IActionResult> Orden([FromBody] int[] ids)
         {
+            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var tiposCuentas = await _repositorioTipoCuentas.ObtenerTodas(usuarioId);
+            var idsTipoCuentas = tiposCuentas.Select(t => t.Id);
+            var idsTiposCuentasNoPertenecenAlUsuario = ids.Except(idsTipoCuentas).ToList();
+
+            if (idsTiposCuentasNoPertenecenAlUsuario.Count > 0)
+                return Forbid();
+
+            var tipoCuentasOrdenados = ids.Select((val, i) => new TipoCuentas() { Id = val, Orden= i+1 }).AsEnumerable();
+
+            await _repositorioTipoCuentas.Ordenar(tipoCuentasOrdenados);
+
             return Ok();
         }
     }

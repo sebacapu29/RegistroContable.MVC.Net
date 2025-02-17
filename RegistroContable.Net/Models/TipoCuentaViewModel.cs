@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RegistroContable.Net.Validaciones;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace RegistroContable.Net.Models
 {
@@ -35,7 +36,11 @@ namespace RegistroContable.Net.Models
                 //Alguna otra validación especifica
                 //...
                 //Mensaje de error
-                yield return new ValidationResult("El campo no puede estar vacío", new[] { nameof(Nombre) });
+                string patron = "[!\"·$%&/()=¿¡?'_:;,|@#€*+.]";
+                if (Regex.IsMatch(Nombre, patron))
+                {
+                    yield return new ValidationResult("El campo no puede contener caracteres especiales", new[] { nameof(Nombre) });
+                }
             }
         }
     }
