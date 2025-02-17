@@ -109,5 +109,10 @@ namespace RegistroContable.Net.Controllers
             }
             return View(tipoCuenta);
         }
+        [HttpPost]
+        public async Task<IActionResult> Orden([FromBody] int id)
+        {
+            return Ok();
+        }
     }
 }
