@@ -1,8 +1,9 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using RegistroContable.Domain;
+using RegistroContable.Entities;
 using RegistroContable.Infraestructura.Interfaces;
+using System.Data;
 
 namespace RegistroContable.Infraestructura.Impl
 {
@@ -24,7 +25,7 @@ namespace RegistroContable.Infraestructura.Impl
         public async Task<TipoCuentas> ObtenerPorId(int id, int usuarioId)
         {
             using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryFirstOrDefaultAsync($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE Id = @Id AND @UsuarioId = @UsuarioId;", new { id, usuarioId });
+            return await connection.QueryFirstOrDefaultAsync<TipoCuentas>($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE Id = @Id AND @UsuarioId = @UsuarioId;", new { id, usuarioId });
         }
 
         public async Task Crear(TipoCuentas tipoCuentas)
@@ -32,9 +33,7 @@ namespace RegistroContable.Infraestructura.Impl
             try
             {
                 using var connection = new SqlConnection(_connectionString);
-                var id = await connection.QuerySingleAsync<int>($"INSERT INTO TipoCuentas (Nombre, UsuarioId, Orden) " +
-                                                    $"Values (@Nombre, @UsuarioId, 0);" +
-                                                    $"SELECT SCOPE_IDENTITY();", tipoCuentas);
+                var id = await connection.QuerySingleAsync<int>($"SP_TipoCuentas_Insertar", new {usuarioId = tipoCuentas.UsuarioId, nombre = tipoCuentas.Nombre }, commandType : CommandType.StoredProcedure);
                 tipoCuentas.Id = id;
             }
             catch (Exception ex)
@@ -50,10 +49,10 @@ namespace RegistroContable.Infraestructura.Impl
             return existe > 0;
         }
 
-        public async Task<IEnumerable<TipoCuentas>> ObtenerTodas(int usuarioId)
+        public async Task<IEnumerable<TipoCuentas>> Obtener(int usuarioId)
         {
             using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<TipoCuentas>($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE UsuarioId = @UsuarioId;",new { usuarioId });
+            return await connection.QueryAsync<TipoCuentas>($"SELECT Id, Nombre, Orden FROM TipoCuentas WHERE UsuarioId = @UsuarioId ORDER BY Orden;",new { usuarioId });
         }
 
         public async Task Borrar(int id)
@@ -63,6 +62,21 @@ namespace RegistroContable.Infraestructura.Impl
                 using var connection = new SqlConnection(_connectionString);
                 await connection.ExecuteAsync(@"DELETE TipoCuentas                                            
                                                 Where Id = @Id", id);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+        public async Task Ordenar(IEnumerable<TipoCuentas> tiposCuentas)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                await connection.ExecuteAsync(@"UPDATE TipoCuentas                                            
+                                              SET Orden = @Orden  
+                                              Where Id = @Id", tiposCuentas);
             }
             catch (Exception ex)
             {

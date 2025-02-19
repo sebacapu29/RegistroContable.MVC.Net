@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RegistroContable.Domain\RegistroContable.Domain.csproj" />
+    <ProjectReference Include="..\RegistroContable.Domain\RegistroContable.Entities.csproj" />
     <ProjectReference Include="..\RegistroContable.Infraestructura\RegistroContable.Infraestructura.csproj" />
   </ItemGroup>
 

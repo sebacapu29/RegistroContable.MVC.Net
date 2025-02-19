@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using RegistroContable.Net.Models;
+using RegistroContable.MVC.Models;
 
 namespace RegistroContable.Net.Controllers
 {

@@ -1,4 +1,4 @@
-﻿namespace RegistroContable.Domain
+﻿namespace RegistroContable.Entities
 {
     public class TipoCuentas
     {

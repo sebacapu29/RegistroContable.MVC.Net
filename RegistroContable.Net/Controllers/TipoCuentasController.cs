@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RegistroContable.Domain;
+using RegistroContable.Entities;
 using RegistroContable.Infraestructura.Interfaces;
 using RegistroContable.MVC.Helpers;
-using RegistroContable.Net.Models;
+using RegistroContable.MVC.Models;
 
-namespace RegistroContable.Net.Controllers
+namespace RegistroContable.MVC.Controllers
 {
     public class TipoCuentasController : Controller
     {
@@ -18,8 +18,8 @@ namespace RegistroContable.Net.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var usuarioId = await this._repositorioUsuarios.ObtenerUsuarioId();
-            var tipoCuentas = await _repositorioTipoCuentas.ObtenerTodas(usuarioId);
+            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var tipoCuentas = await _repositorioTipoCuentas.Obtener(usuarioId);
             var tipoCuentasVM = MapperHelper.MappTipoCuentaDTOToVM(tipoCuentas);
             return View(tipoCuentasVM);
         }
@@ -30,7 +30,7 @@ namespace RegistroContable.Net.Controllers
         [HttpPost]
         public async Task<IActionResult> Crear(TipoCuentaViewModel tipoCuenta)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return View(tipoCuenta);
             }
@@ -40,22 +40,23 @@ namespace RegistroContable.Net.Controllers
                 ModelState.AddModelError(nameof(tipoCuenta.Nombre), $"El nombre {tipoCuenta.Nombre} ya existe.");
                 return View(tipoCuenta);
             }
-            tipoCuenta.UsuarioId = await this._repositorioUsuarios.ObtenerUsuarioId();
+            tipoCuenta.UsuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
             TipoCuentas tipoCuentaDTO = MapperHelper.MappTipoCuentaVMToDTO(tipoCuenta);
-            await this._repositorioTipoCuentas.Crear(tipoCuentaDTO);
+            await _repositorioTipoCuentas.Crear(tipoCuentaDTO);
             return RedirectToAction("Index");
         }
         [HttpGet]
         public async Task<IActionResult> VerificarExisteTipoCuenta(string nombre)
         {
-            int usuarioId = await this._repositorioUsuarios.ObtenerUsuarioId();
+            int usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
             var existeTipoCuenta = await _repositorioTipoCuentas.Existe(nombre, usuarioId);
-            if (existeTipoCuenta) {
-                return Json($"El nombre { nombre } ya existe.");
+            if (existeTipoCuenta)
+            {
+                return Json($"El nombre {nombre} ya existe.");
             }
             return Json(true);
         }
-  
+
         public async Task<IActionResult> BorrarTipoCuenta(int id)
         {
             var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
@@ -100,7 +101,7 @@ namespace RegistroContable.Net.Controllers
             var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
             var tipoCuenta = await _repositorioTipoCuentas.ObtenerPorId(id, usuarioId);
 
-            if(tipoCuenta == null)
+            if (tipoCuenta == null)
             {
                 return RedirectToAction("NoEcontrado", "Home");
             }
@@ -110,14 +111,14 @@ namespace RegistroContable.Net.Controllers
         public async Task<IActionResult> Orden([FromBody] int[] ids)
         {
             var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
-            var tiposCuentas = await _repositorioTipoCuentas.ObtenerTodas(usuarioId);
+            var tiposCuentas = await _repositorioTipoCuentas.Obtener(usuarioId);
             var idsTipoCuentas = tiposCuentas.Select(t => t.Id);
             var idsTiposCuentasNoPertenecenAlUsuario = ids.Except(idsTipoCuentas).ToList();
 
             if (idsTiposCuentasNoPertenecenAlUsuario.Count > 0)
                 return Forbid();
 
-            var tipoCuentasOrdenados = ids.Select((val, i) => new TipoCuentas() { Id = val, Orden= i+1 }).AsEnumerable();
+            var tipoCuentasOrdenados = ids.Select((val, i) => new TipoCuentas() { Id = val, Orden = i + 1 }).AsEnumerable();
 
             await _repositorioTipoCuentas.Ordenar(tipoCuentasOrdenados);
 

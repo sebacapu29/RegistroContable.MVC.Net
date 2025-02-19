@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RegistroContable.Net.Validaciones;
+using RegistroContable.MVC.Validaciones;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace RegistroContable.Net.Models
+namespace RegistroContable.MVC.Models
 {
     public class TipoCuentaViewModel : IValidatableObject
     {
@@ -15,8 +15,8 @@ namespace RegistroContable.Net.Models
         /// [Remote] validación previa a ingresar al controlador, el objetivo es validar el dato ingresado por el usuario antes de dar submite
         /// </summary>
         [Required(ErrorMessage = "El campo {0} es requerido")]
-        [StringLength(maximumLength:50, MinimumLength = 3, ErrorMessage ="La longitud del campo {0} debe estar {2} y {1}")]
-        [Display(Name ="Nombre del Tipo Cuenta")]
+        [StringLength(maximumLength: 50, MinimumLength = 3, ErrorMessage = "La longitud del campo {0} debe estar {2} y {1}")]
+        [Display(Name = "Nombre del Tipo Cuenta")]
         [PrimeraLetraMayuscula]
         [Remote(action: "VerificarExisteTipoCuenta", controller: "TipoCuentas")]
         public string? Nombre { get; set; }

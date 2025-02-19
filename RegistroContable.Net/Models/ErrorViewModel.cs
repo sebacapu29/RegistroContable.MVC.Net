@@ -1,4 +1,4 @@
-namespace RegistroContable.Net.Models
+namespace RegistroContable.MVC.Models
 {
     public class ErrorViewModel
     {

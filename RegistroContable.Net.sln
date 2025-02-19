@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistroContable.MVC", "Reg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistroContable.Infraestructura", "RegistroContable.Infraestructura\RegistroContable.Infraestructura.csproj", "{95CE067B-7D49-4609-9228-5628198221EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistroContable.Domain", "RegistroContable.Domain\RegistroContable.Domain.csproj", "{87D37A7D-2957-4F2B-BD19-5988A029F12A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistroContable.Entities", "RegistroContable.Domain\RegistroContable.Entities.csproj", "{87D37A7D-2957-4F2B-BD19-5988A029F12A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
