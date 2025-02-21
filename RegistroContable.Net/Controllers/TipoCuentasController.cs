@@ -9,16 +9,16 @@ namespace RegistroContable.MVC.Controllers
     public class TipoCuentasController : Controller
     {
         private readonly IRepositorioTipoCuentas _repositorioTipoCuentas;
-        private readonly IRepositorioUsuarios _repositorioUsuarios;
+        private readonly IServicioUsuarios _servicioUsuarios;
 
-        public TipoCuentasController(IRepositorioTipoCuentas repositorioTipoCuentas, IRepositorioUsuarios repositorioUsuarios)
+        public TipoCuentasController(IRepositorioTipoCuentas repositorioTipoCuentas, IServicioUsuarios repositorioUsuarios)
         {
             _repositorioTipoCuentas = repositorioTipoCuentas;
-            _repositorioUsuarios = repositorioUsuarios;
+            _servicioUsuarios = repositorioUsuarios;
         }
         public async Task<IActionResult> Index()
         {
-            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var usuarioId =  _servicioUsuarios.ObtenerUsuarioId();
             var tipoCuentas = await _repositorioTipoCuentas.Obtener(usuarioId);
             var tipoCuentasVM = MapperHelper.MappTipoCuentaDTOToVM(tipoCuentas);
             return View(tipoCuentasVM);
@@ -40,7 +40,7 @@ namespace RegistroContable.MVC.Controllers
                 ModelState.AddModelError(nameof(tipoCuenta.Nombre), $"El nombre {tipoCuenta.Nombre} ya existe.");
                 return View(tipoCuenta);
             }
-            tipoCuenta.UsuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            tipoCuenta.UsuarioId =  _servicioUsuarios.ObtenerUsuarioId();
             TipoCuentas tipoCuentaDTO = MapperHelper.MappTipoCuentaVMToDTO(tipoCuenta);
             await _repositorioTipoCuentas.Crear(tipoCuentaDTO);
             return RedirectToAction("Index");
@@ -48,7 +48,7 @@ namespace RegistroContable.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> VerificarExisteTipoCuenta(string nombre)
         {
-            int usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            int usuarioId = _servicioUsuarios.ObtenerUsuarioId();
             var existeTipoCuenta = await _repositorioTipoCuentas.Existe(nombre, usuarioId);
             if (existeTipoCuenta)
             {
@@ -59,7 +59,7 @@ namespace RegistroContable.MVC.Controllers
 
         public async Task<IActionResult> BorrarTipoCuenta(int id)
         {
-            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var usuarioId = _servicioUsuarios.ObtenerUsuarioId();
             var tipoCuenta = await _repositorioTipoCuentas.ObtenerPorId(id, usuarioId);
 
             if (tipoCuenta == null)
@@ -73,7 +73,7 @@ namespace RegistroContable.MVC.Controllers
         [HttpDelete]
         public async Task<IActionResult> Borrar(TipoCuentas tipoCuentas)
         {
-            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var usuarioId = _servicioUsuarios.ObtenerUsuarioId();
             var tipoCuenta = await _repositorioTipoCuentas.ObtenerPorId(tipoCuentas.Id, usuarioId);
 
             if (tipoCuenta == null)
@@ -86,7 +86,7 @@ namespace RegistroContable.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> Editar(TipoCuentas tipoCuentas)
         {
-            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var usuarioId = _servicioUsuarios.ObtenerUsuarioId();
             var tipoCuenta = await _repositorioTipoCuentas.ObtenerPorId(tipoCuentas.Id, usuarioId);
 
             if (tipoCuenta == null)
@@ -98,7 +98,7 @@ namespace RegistroContable.MVC.Controllers
         }
         public async Task<IActionResult> Editar(int id)
         {
-            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var usuarioId = _servicioUsuarios.ObtenerUsuarioId();
             var tipoCuenta = await _repositorioTipoCuentas.ObtenerPorId(id, usuarioId);
 
             if (tipoCuenta == null)
@@ -110,7 +110,7 @@ namespace RegistroContable.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> Orden([FromBody] int[] ids)
         {
-            var usuarioId = await _repositorioUsuarios.ObtenerUsuarioId();
+            var usuarioId = _servicioUsuarios.ObtenerUsuarioId();
             var tiposCuentas = await _repositorioTipoCuentas.Obtener(usuarioId);
             var idsTipoCuentas = tiposCuentas.Select(t => t.Id);
             var idsTiposCuentasNoPertenecenAlUsuario = ids.Except(idsTipoCuentas).ToList();

@@ -6,5 +6,8 @@ namespace RegistroContable.Infraestructura.Interfaces
     {
         Task Crear(Cuenta cuenta);
         Task<IEnumerable<Cuenta>> Buscar(int usuarioId);
+        Task<Cuenta> ObtenerPorId(int id, int usuarioId);
+        Task Actualizar(Cuenta cuenta);
+        Task Borrar(int id);
     }
 }

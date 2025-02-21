@@ -15,6 +15,18 @@ namespace RegistroContable.Infraestructura.Impl
             _connectionString = configuration!.GetConnectionString("DefaultConnection");
         }
 
+        public async Task Actualizar(Cuenta cuenta)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(@"UPDATE Cuentas SET Nombre = @Nombre, TipoCuentaId = @TipoCuentaId, Descripcion = @Descripcion, Balance = @Balance) WHERE Id = @Id;", cuenta);
+        }
+
+        public async Task Borrar(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(@"DELETE Cuentas WHERE Id = @Id;", new {id});
+        }
+
         public async Task<IEnumerable<Cuenta>> Buscar(int usuarioId)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -23,7 +35,6 @@ namespace RegistroContable.Infraestructura.Impl
                                                         INNER JOIN TipoCuentas tc ON tc.Id = c.TipoCuentaId
                                                         WHERE tc.UsuarioId = @UsuarioId
                                                         ORDER BY tc.Orden", new { usuarioId });
-            throw new NotImplementedException();
         }
 
         public async Task Crear(Cuenta cuenta)
@@ -38,6 +49,16 @@ namespace RegistroContable.Infraestructura.Impl
             {
                 throw;
             }
+        }
+
+        public async Task<Cuenta> ObtenerPorId(int id, int usuarioId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QueryFirstOrDefaultAsync<Cuenta>(@"SELECT c.Id, c.Nombre, c.Balance, c.Descripcion, tc.Id
+                                                        FROM Cuentas c
+                                                        INNER JOIN TipoCuentas tc ON tc.Id = c.TipoCuentaId
+                                                        WHERE tc.UsuarioId = @UsuarioId AND c.Id = @Id
+                                                        ORDER BY tc.Orden", new { id, usuarioId }) ?? new();
         }
     }
 }
